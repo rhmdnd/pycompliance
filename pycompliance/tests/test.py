@@ -127,13 +127,15 @@ class TestControl(unittest.TestCase):
 
     def test_from_dict_without_id_throws_exception(self):
         d = {}
-        self.assertRaises(pycompliance.InvalidControlException, pycompliance.Control.from_dict, d)
+        self.assertRaises(pycompliance.InvalidControlException,
+                          pycompliance.Control.from_dict, d)
 
     def test_control_with_invalid_id(self):
         # We should expect strings, not integers, floats, or boolean types for
         # IDs.
         for i in [1.1, 1, True, False]:
-            self.assertRaises(pycompliance.InvalidControlException, pycompliance.Control, i)
+            self.assertRaises(pycompliance.InvalidControlException,
+                              pycompliance.Control, i)
 
     def test_add_control(self):
         b = pycompliance.Benchmark('foo')
