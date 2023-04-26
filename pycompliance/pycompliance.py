@@ -15,6 +15,14 @@ class Node:
             if n:
                 return n
 
+    def traverse(self, node: 'Node') -> 'list[Node]':
+        r = []
+        for child in node.children:
+            res = self.traverse(child)
+            r = res + r
+        r.append(node)
+        return r
+
 
 class Benchmark(Node):
 
@@ -22,9 +30,14 @@ class Benchmark(Node):
         super().__init__(name)
         self.name = name
         self.id = name
-        self.version = None
+        self.version = ''
 
     def add_section(self, section: 'Section'):
+        # see if the section already exists
+        s = self.find(section.id)
+        if s:
+            return s
+
         if '.' not in section.id:
             self.children.append(section)
             return
@@ -42,7 +55,7 @@ class Benchmark(Node):
         parent.children.append(control)
 
     def _find_parent_id(self, id: str) -> str:
-        pattern = re.compile(r"^(.+).\d$")
+        pattern = re.compile(r"^(.+)\.(\d+)$")
         m = pattern.search(id)
         return m.group(1)
 

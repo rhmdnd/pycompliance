@@ -10,8 +10,12 @@ class TestBenchmark(unittest.TestCase):
 
     def test_benchmark_defaults(self):
         self.assertEqual(self.b.name, 'foo')
-        self.assertIsNone(self.b.version)
+        self.assertEqual(self.b.version, '')
         self.assertListEqual(self.b.children, [])
+
+    def test_benchmark_set_version(self):
+        self.b.version = '1.2.1'
+        self.assertEqual(self.b.version, '1.2.1')
 
     def test_find_section(self):
         section = pycompliance.Section('1')
@@ -85,6 +89,14 @@ class TestSection(unittest.TestCase):
         self.assertIn(s, b.children)
         self.assertNotIn(sub, b.children)
 
+    def test_add_duplicate_section(self):
+        b = pycompliance.Benchmark('foo')
+        s = pycompliance.Section('1')
+        b.add_section(s)
+        self.assertListEqual(b.children, [s])
+        b.add_section(s)
+        self.assertListEqual(b.children, [s])
+
 
 class TestControl(unittest.TestCase):
     def test_default_control(self):
@@ -155,3 +167,36 @@ class TestControl(unittest.TestCase):
         control = pycompliance.Control('1.1.1')
         b.add_section(section)
         self.assertRaises(pycompliance.SectionNotFound, b.add_control, control)
+
+    def test_add_control_(self):
+        b = pycompliance.Benchmark('foo')
+        section = pycompliance.Section('3')
+        subsection = pycompliance.Section('3.2')
+        b.add_section(section)
+        b.add_section(subsection)
+        expected = []
+        for i in range(20):
+            control = pycompliance.Control('3.2.' + str(i))
+            expected.append(control)
+            b.add_control(control)
+        self.assertListEqual(b.children, [section])
+        self.assertListEqual(section.children, [subsection])
+        self.assertListEqual(subsection.children, expected)
+
+class TestTraveral(unittest.TestCase):
+
+    def test_traverse_benchmark(self):
+        b = pycompliance.Benchmark('foo')
+        section = pycompliance.Section('1')
+        subsection = pycompliance.Section('1.1')
+        c1 = pycompliance.Control('1.1.1')
+        c2 = pycompliance.Control('1.1.2')
+        expected = [b, section, subsection, c1, c2]
+        b.add_section(section)
+        b.add_section(subsection)
+        b.add_control(c1)
+        b.add_control(c2)
+        nodes = b.traverse(b)
+        self.assertEqual(len(expected), len(nodes))
+        for n in nodes:
+            self.assertIn(n, expected)
