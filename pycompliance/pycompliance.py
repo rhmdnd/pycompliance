@@ -19,7 +19,7 @@ class Node:
         r = []
         for child in node.children:
             res = self.traverse(child)
-            r = res + r
+            r = r + res
         r.append(node)
         return r
 
